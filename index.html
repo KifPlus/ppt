@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Heritage Tobacco | Executive Financial Dashboard</title>
+    <!-- Chart.js CDN (keeping for potential future use but removed fundraiser slide) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f4f2 0%, #e2e8e5 100%);
+            font-family: 'Inter', sans-serif;
+            padding: 40px 28px;
+            color: #1a2e28;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* Premium card design */
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(0px);
+            border-radius: 36px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(226, 184, 122, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 28px 50px -15px rgba(0, 0, 0, 0.18);
+        }
+
+        .card-header {
+            padding: 22px 32px;
+            background: linear-gradient(115deg, #1e3f33 0%, #2a5a46 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .card-header h2 {
+            font-weight: 700;
+            font-size: 1.6rem;
+            letter-spacing: -0.4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge-premium {
+            background: #e2b87a;
+            color: #1e3f33;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+
+        .badge-editable {
+            background: rgba(226, 184, 122, 0.2);
+            border: 1px dashed #e2b87a;
+            color: #e2b87a;
+            padding: 4px 12px;
+            border-radius: 60px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .card-body {
+            padding: 28px 32px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ece2d4;
+        }
+        th {
+            background: #f9f5ef;
+            font-weight: 700;
+            color: #2a5a46;
+            font-size: 0.85rem;
+        }
+        .editable-number {
+            background: #fef9ef;
+            border: 1px solid #e2b87a;
+            border-radius: 12px;
+            padding: 6px 10px;
+            min-width: 110px;
+            display: inline-block;
+            cursor: text;
+            font-weight: 600;
+            font-family: 'Inter', monospace;
+            font-size: 0.9rem;
+            color: #c47a44;
+            text-align: center;
+            transition: all 0.15s;
+        }
+        .editable-number:focus {
+            background: #ffffff;
+            border-color: #c47a44;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(196,122,68,0.15);
+        }
+        .stat-number {
+            font-weight: 800;
+            background: #eef3f0;
+            padding: 8px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        .flex-stat {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        .product-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 15px;
+        }
+        .product-card {
+            flex: 1;
+            min-width: 300px;
+            background: #fefcf7;
+            border-radius: 28px;
+            padding: 26px;
+            border: 1px solid #efe3d4;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+        }
+        .product-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2a5a46;
+            border-left: 4px solid #e2b87a;
+            padding-left: 16px;
+        }
+        .hr-light {
+            margin: 20px 0;
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, #e2b87a, transparent);
+        }
+        .revenue-row {
+            background: #f8f3ea;
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin-top: 12px;
+        }
+        .footer-note {
+            text-align: center;
+            font-size: 0.72rem;
+            color: #8ba39a;
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #e2d5c4;
+        }
+        .conversion-chip {
+            background: #fff3e6;
+            border-radius: 40px;
+            padding: 5px 14px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+        .highlight-number {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #c47a44;
+        }
+        .made-by {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #8ba39a;
+            margin-top: 20px;
+            letter-spacing: 0.8px;
+            font-weight: 500;
+            font-family: monospace;
+            padding: 16px 0 8px;
+            border-top: 1px solid rgba(226, 184, 122, 0.3);
+        }
+        button {
+            background: #2a5a46;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+        button:hover {
+            background: #c47a44;
+            transform: translateY(-2px);
+        }
+        .inline-rate {
+            background: none;
+            border: 1px dashed #e2b87a;
+            border-radius: 8px;
+            padding: 2px 8px;
+            width: 60px;
+            text-align: center;
+            font-weight: 700;
+        }
+        @media (max-width: 750px) {
+            .card-body { padding: 18px; }
+            th, td { font-size: 0.7rem; }
+            .editable-number { min-width: 80px; font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- TITLE SLIDE -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-leaf" style="color: #e2b87a;"></i> Heritage Tobacco</h2>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <span class="badge-premium"><i class="fas fa-calendar-week"></i> 6 Months Runway</span>
+                <span class="badge-premium"><i class="fas fa-user-circle"></i> CEO: MS</span>
+                <span class="badge-editable"><i class="fas fa-edit"></i> Click any number to edit</span>
+            </div>
+        </div>
+        <div class="card-body" style="text-align: center; padding: 32px;">
+            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto; font-weight: 500;">Crafted Legacy, Global Taste — India & UAE Manufacturing Expansion</p>
+            <div style="margin-top: 26px; display: flex; justify-content: center; gap: 18px; flex-wrap: wrap;">
+                <span class="conversion-chip"><i class="fas fa-rupee-sign"></i> INR Base</span>
+                <span class="conversion-chip"><i class="fas fa-exchange-alt"></i> 1 AED = <span id="exchangeRate" contenteditable="true" style="background: #fff3e6; border: none; font-weight:800; display:inline-block; width:55px; border-radius:8px; padding:2px 6px;">25.77</span> INR</span>
+                <span class="conversion-chip"><i class="fas fa-chart-line"></i> Real-time editable</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- INDIA MANUFACTURING - Fully editable -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-industry"></i> India Manufacturing Setup (INR)</h2>
+            <span class="badge-premium">Monthly ×6 → 6-month totals</span>
+        </div>
+        <div class="card-body">
+            <table id="indiaTable">
+                <thead>
+                    <tr><th>Component</th><th>Monthly Amount (₹)</th><th>6-Month Total (₹)</th><th>Cost Type</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td class="amount-label">Licenses & Approvals</td><td><span contenteditable="true" class="editable-number" data-india-monthly="0">300000</span></td><td class="india-6m" id="india6m_0">-</td><td>One-time</td></tr>
+                    <tr><td class="amount-label">Factory Setup</td><td><span contenteditable="true" class="editable-number" data-india-monthly="1">2500000</span></td><td class="india-6m" id="india6m_1">-</td><td>One-time</td></tr>
+                    <tr><td class="amount-label">Machinery</td><td><span contenteditable="true" class="editable-number" data-india-monthly="2">1500000</span></td><td class="india-6m" id="india6m_2">-</td><td>One-time</td></tr>
+                    <tr><td class="amount-label">Rent</td><td><span contenteditable="true" class="editable-number" data-india-monthly="3">100000</span></td><td class="india-6m" id="india6m_3">-</td><td>Recurring (×6)</td></tr>
+                    <tr><td class="amount-label">Electricity</td><td><span contenteditable="true" class="editable-number" data-india-monthly="4">15000</span></td><td class="india-6m" id="india6m_4">-</td><td>Recurring (×6)</td></tr>
+                    <tr><td class="amount-label">Labor</td><td><span contenteditable="true" class="editable-number" data-india-monthly="5">54000</span></td><td class="india-6m" id="india6m_5">-</td><td>Recurring (×6)</td></tr>
+                    <tr><td class="amount-label">Skilled Labor</td><td><span contenteditable="true" class="editable-number" data-india-monthly="6">48000</span></td><td class="india-6m" id="india6m_6">-</td><td>Recurring (×6)</td></tr>
+                    <tr><td class="amount-label">Miscellaneous</td><td><span contenteditable="true" class="editable-number" data-india-monthly="7">25000</span></td><td class="india-6m" id="india6m_7">-</td><td>Recurring (×6)</td></tr>
+                </tbody>
+            </table>
+            <div class="flex-stat">
+                <div><strong>🏭 One-time Capex:</strong> <span id="indiaOneTimeSum" class="stat-number">₹0</span></div>
+                <div><strong>🔄 Recurring (6 months):</strong> <span id="indiaRecurring6Sum" class="stat-number">₹0</span></div>
+                <div><strong>💰 India 6-Month Total:</strong> <span id="indiaTotal6" class="stat-number" style="background:#c47a44; color:white;">₹0</span></div>
+                <button id="resetIndiaBtn"><i class="fas fa-undo-alt"></i> Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCT ECONOMICS - Fully editable -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-simple"></i> Product Economics & Revenue</h2>
+            <span class="badge-premium">Edit prices → Profit & Revenue update live</span>
+        </div>
+        <div class="card-body">
+            <div class="product-grid">
+                <div class="product-card">
+                    <h3><i class="fas fa-tobacco"></i> Pandarpuri (RMC)</h3>
+                    <div><strong>RMC Cost:</strong> <span contenteditable="true" id="ppRmc" class="editable-number">502.5</span> ₹/kg</div>
+                    <div style="margin-top: 12px;"><strong>Sales Price:</strong> <span contenteditable="true" id="ppPrice" class="editable-number">753.76</span> ₹/kg</div>
+                    <div style="margin-top: 12px;"><strong style="color:#c47a44;">Net Profit/kg:</strong> <span id="ppNp">251.26</span> ₹</div>
+                    <div class="hr-light"></div>
+                    <div class="revenue-row"><i class="fas fa-shipping-fast"></i> <strong>20ft Container</strong> (4,218.75 kg)<br>Revenue: <strong>₹<span id="pp20Rev">0</span></strong></div>
+                    <div class="revenue-row"><i class="fas fa-ship"></i> <strong>40ft Container</strong> (10,125 kg)<br>Revenue: <strong>₹<span id="pp40Rev">0</span></strong></div>
+                </div>
+                <div class="product-card">
+                    <h3><i class="fas fa-water"></i> Shisha Flavors</h3>
+                    <div><strong>RMC Cost:</strong> <span contenteditable="true" id="shRmc" class="editable-number">350</span> ₹/kg</div>
+                    <div style="margin-top: 12px;"><strong>Sales Price:</strong> <span contenteditable="true" id="shPrice" class="editable-number">800</span> ₹/kg</div>
+                    <div style="margin-top: 12px;"><strong style="color:#c47a44;">Net Profit/kg:</strong> <span id="shNp">450</span> ₹</div>
+                    <div class="hr-light"></div>
+                    <div class="revenue-row"><i class="fas fa-weight-hanging"></i> <strong>1,000 kg Bulk</strong><br>Revenue: <strong>₹<span id="sh1kRev">0</span></strong></div>
+                    <div class="revenue-row"><i class="fas fa-container-storage"></i> <strong>20ft Container</strong> (9,750 kg)<br>Revenue: <strong>₹<span id="sh20Rev">0</span></strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UAE MANUFACTURING (Recurring monthly ×6, One-time as is) -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-globe-asia"></i> UAE Manufacturing Setup</h2>
+            <span class="badge-premium">AED values ×6 months → INR @ live rate</span>
+        </div>
+        <div class="card-body">
+            <table id="uaeTable">
+                <thead><tr><th>Component (AED)</th><th>Monthly Amount (AED)</th><th>6-Month Total (AED)</th><th>6-Month Total (INR)</th><th>Type</th></tr></thead>
+                <tbody>
+                    <tr><td class="amount-label">License & Approvals</td><td><span contenteditable="true" class="editable-number" data-uae-monthly="0">41100</span></td><td class="uae-6m-aed" id="uae6mAed_0">-</td><td class="uae-6m-inr" id="uae6mInr_0">-</td><td>One-time</td></tr>
+                    <tr><td class="amount-label">Factory Setup</td><td><span contenteditable="true" class="editable-number" data-uae-monthly="1">46300</span></td><td class="uae-6m-aed" id="uae6mAed_1">-</td><td class="uae-6m-inr" id="uae6mInr_1">-</td><td>One-time</td></tr>
+                    <tr><td class="amount-label">Machinery</td><td><span contenteditable="true" class="editable-number" data-uae-monthly="2">51500</span></td><td class="uae-6m-aed" id="uae6mAed_2">-</td><td class="uae-6m-inr" id="uae6mInr_2">-</td><td>One-time</td></tr>
+                    <tr><td class="amount-label">Rent</td><td><span contenteditable="true" class="editable-number" data-uae-monthly="3">8300</span></td><td class="uae-6m-aed" id="uae6mAed_3">-</td><td class="uae-6m-inr" id="uae6mInr_3">-</td><td>Recurring (×6)</td></tr>
+                    <tr><td class="amount-label">Electricity</td><td><span contenteditable="true" class="editable-number" data-uae-monthly="4">2500</span></td><td class="uae-6m-aed" id="uae6mAed_4">-</td><td class="uae-6m-inr" id="uae6mInr_4">-</td><td>Recurring</td></tr>
+                    <tr><td class="amount-label">Labor</td><td><span contenteditable="true" class="editable-number" data-uae-monthly="5">4000</span></td><td class="uae-6m-aed" id="uae6mAed_5">-</td><td class="uae-6m-inr" id="uae6mInr_5">-</td><td>Recurring</td></tr>
+                    <tr><td class="amount-label">Skilled Labor</td><td><span contenteditable="true" class="editable-number" data-uae-monthly="6">3500</span></td><td class="uae-6m-aed" id="uae6mAed_6">-</td><td class="uae-6m-inr" id="uae6mInr_6">-</td><td>Recurring</td></tr>
+                    <tr><td class="amount-label">Misc</td><td><span contenteditable="true" class="editable-number" data-uae-monthly="7">2000</span></td><td class="uae-6m-aed" id="uae6mAed_7">-</td><td class="uae-6m-inr" id="uae6mInr_7">-</td><td>Recurring</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MARKETING & PROFESSIONAL SERVICES (Subscriptions & Events & Exhibitions are ONE-TIME) -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-line"></i> Marketing & Professional Services</h2>
+            <span class="badge-premium">Subscriptions & Events are One-time expenses</span>
+        </div>
+        <div class="card-body">
+            <table id="marketingTable">
+                <thead><tr><th>Service</th><th>Monthly Amount (AED)</th><th>6-Month Total (AED)</th><th>6-Month Total (INR)</th><th>Type</th></tr></thead>
+                <tbody>
+                    <tr><td class="amount-label">Digital Marketing</td><td><span contenteditable="true" class="editable-number" data-mkt-monthly="0">1000</span></td><td class="mkt-6m-aed" id="mkt6mAed_0">-</td><td class="mkt-6m-inr" id="mkt6mInr_0">-</td><td>Recurring</td></tr>
+                    <tr><td class="amount-label">Sales Person</td><td><span contenteditable="true" class="editable-number" data-mkt-monthly="1">3000</span></td><td class="mkt-6m-aed" id="mkt6mAed_1">-</td><td class="mkt-6m-inr" id="mkt6mInr_1">-</td><td>Recurring</td></tr>
+                    <tr><td class="amount-label">Subscriptions</td><td><span contenteditable="true" class="editable-number" data-mkt-monthly="2">2000</span></td><td class="mkt-6m-aed" id="mkt6mAed_2">-</td><td class="mkt-6m-inr" id="mkt6mInr_2">-</td><td style="color:#c47a44; font-weight:700;">One-time (prepaid)</td></tr>
+                    <tr><td class="amount-label">Promotions</td><td><span contenteditable="true" class="editable-number" data-mkt-monthly="3">3000</span></td><td class="mkt-6m-aed" id="mkt6mAed_3">-</td><td class="mkt-6m-inr" id="mkt6mInr_3">-</td><td>Recurring</td></tr>
+                    <tr><td class="amount-label">Events & Exhibitions</td><td><span contenteditable="true" class="editable-number" data-mkt-monthly="4">25000</span></td><td class="mkt-6m-aed" id="mkt6mAed_4">-</td><td class="mkt-6m-inr" id="mkt6mInr_4">-</td><td style="color:#c47a44; font-weight:700;">One-time (event cost)</td></tr>
+                    <tr><td class="amount-label">CA & Professional</td><td><span contenteditable="true" class="editable-number" data-mkt-monthly="5">500</span></td><td class="mkt-6m-aed" id="mkt6mAed_5">-</td><td class="mkt-6m-inr" id="mkt6mInr_5">-</td><td>Recurring</td></tr>
+                </tbody>
+            </table>
+            <div class="flex-stat" style="margin-top: 25px;">
+                <div><strong>🇦🇪 UAE One-time (AED):</strong> <span id="uaeOneTimeAedTotal">0</span> AED → <strong>₹<span id="uaeOneTimeInrTotal">0</span></strong></div>
+                <div><strong>🔄 UAE Recurring (6M AED):</strong> <span id="uaeRecurringAedTotal">0</span> AED → <strong>₹<span id="uaeRecurringInrTotal">0</span></strong></div>
+                <div><strong>📦 UAE Total Outlay (INR):</strong> <span id="uaeGrandTotalInr" class="stat-number" style="background:#c47a44; color:white;">₹0</span></div>
+                <button id="resetUaeBtn"><i class="fas fa-undo-alt"></i> Reset UAE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MADE BY HS - Footer -->
+    <div class="made-by">
+        <i class="fas fa-code"></i> Made by HS
+    </div>
+</div>
+
+<script>
+    // Helper: get exchange rate
+    function getExchangeRate() { let r = parseFloat(document.getElementById('exchangeRate').innerText); return isNaN(r) ? 25.77 : r; }
+
+    // India calculations
+    function updateIndia() {
+        let monthly = [];
+        document.querySelectorAll('[data-india-monthly]').forEach(el => { monthly.push(parseFloat(el.innerText.replace(/,/g,'')) || 0); });
+        let oneTime = monthly[0] + monthly[1] + monthly[2];
+        let recurring6 = (monthly[3] + monthly[4] + monthly[5] + monthly[6] + monthly[7]) * 6;
+        document.getElementById('indiaOneTimeSum').innerHTML = '₹' + oneTime.toLocaleString('en-IN');
+        document.getElementById('indiaRecurring6Sum').innerHTML = '₹' + recurring6.toLocaleString('en-IN');
+        document.getElementById('indiaTotal6').innerHTML = '₹' + (oneTime + recurring6).toLocaleString('en-IN');
+        for(let i=0;i<=7;i++) { let val6 = (i<=2) ? monthly[i] : monthly[i]*6; document.getElementById(`india6m_${i}`).innerHTML = '₹' + val6.toLocaleString('en-IN'); }
+    }
+
+    // Products
+    function updateProducts() {
+        let ppRmc = parseFloat(document.getElementById('ppRmc').innerText) || 0;
+        let ppPrice = parseFloat(document.getElementById('ppPrice').innerText) || 0;
+        document.getElementById('ppNp').innerText = (ppPrice - ppRmc).toFixed(2);
+        document.getElementById('pp20Rev').innerText = Math.round(4218.75 * ppPrice).toLocaleString('en-IN');
+        document.getElementById('pp40Rev').innerText = Math.round(10125 * ppPrice).toLocaleString('en-IN');
+        let shRmc = parseFloat(document.getElementById('shRmc').innerText) || 0;
+        let shPrice = parseFloat(document.getElementById('shPrice').innerText) || 0;
+        document.getElementById('shNp').innerText = (shPrice - shRmc).toFixed(2);
+        document.getElementById('sh1kRev').innerText = Math.round(1000 * shPrice).toLocaleString('en-IN');
+        document.getElementById('sh20Rev').innerText = Math.round(9750 * shPrice).toLocaleString('en-IN');
+    }
+
+    // UAE + Marketing combined (subscriptions & events as one-time)
+    function updateUAEAndMarketing() {
+        let rate = getExchangeRate();
+        // UAE Manufacturing (8 items)
+        let uaeMonthly = [];
+        document.querySelectorAll('[data-uae-monthly]').forEach(el => { uaeMonthly.push(parseFloat(el.innerText.replace(/,/g,'')) || 0); });
+        let uaeOneTimeAed = uaeMonthly[0] + uaeMonthly[1] + uaeMonthly[2];
+        let uaeRecurring6Aed = 0;
+        for(let i=3; i<uaeMonthly.length; i++) uaeRecurring6Aed += uaeMonthly[i] * 6;
+        for(let i=0; i<uaeMonthly.length; i++) {
+            let val6 = (i<=2) ? uaeMonthly[i] : uaeMonthly[i]*6;
+            document.getElementById(`uae6mAed_${i}`).innerHTML = val6.toLocaleString() + ' AED';
+            document.getElementById(`uae6mInr_${i}`).innerHTML = '₹' + Math.round(val6 * rate).toLocaleString('en-IN');
+        }
+        // Marketing (6 items) -> subscriptions (index2) & events (index4) are one-time (no ×6)
+        let mktMonthly = [];
+        document.querySelectorAll('[data-mkt-monthly]').forEach(el => { mktMonthly.push(parseFloat(el.innerText.replace(/,/g,'')) || 0); });
+        let mktOneTimeAed = 0, mktRecurring6Aed = 0;
+        for(let i=0; i<mktMonthly.length; i++) {
+            if(i === 2 || i === 4) { mktOneTimeAed += mktMonthly[i]; } // Subscriptions & Events: one-time
+            else { mktRecurring6Aed += mktMonthly[i] * 6; }
+            let val6 = (i===2 || i===4) ? mktMonthly[i] : mktMonthly[i]*6;
+            document.getElementById(`mkt6mAed_${i}`).innerHTML = val6.toLocaleString() + ' AED';
+            document.getElementById(`mkt6mInr_${i}`).innerHTML = '₹' + Math.round(val6 * rate).toLocaleString('en-IN');
+        }
+        let totalOneTimeAed = uaeOneTimeAed + mktOneTimeAed;
+        let totalRecurring6Aed = uaeRecurring6Aed + mktRecurring6Aed;
+        let grandTotalAed = totalOneTimeAed + totalRecurring6Aed;
+        document.getElementById('uaeOneTimeAedTotal').innerHTML = totalOneTimeAed.toLocaleString();
+        document.getElementById('uaeRecurringAedTotal').innerHTML = totalRecurring6Aed.toLocaleString();
+        document.getElementById('uaeOneTimeInrTotal').innerHTML = Math.round(totalOneTimeAed * rate).toLocaleString('en-IN');
+        document.getElementById('uaeRecurringInrTotal').innerHTML = Math.round(totalRecurring6Aed * rate).toLocaleString('en-IN');
+        document.getElementById('uaeGrandTotalInr').innerHTML = '₹' + Math.round(grandTotalAed * rate).toLocaleString('en-IN');
+    }
+
+    function refreshAll() { updateIndia(); updateProducts(); updateUAEAndMarketing(); }
+    function bindEvents() {
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => el.addEventListener('blur', refreshAll));
+        document.querySelectorAll('.editable-number').forEach(el => el.addEventListener('blur', refreshAll));
+        document.getElementById('exchangeRate').addEventListener('blur', refreshAll);
+    }
+    // Reset buttons
+    document.getElementById('resetIndiaBtn').addEventListener('click', () => {
+        let defaults = [300000,2500000,1500000,100000,15000,54000,48000,25000];
+        document.querySelectorAll('[data-india-monthly]').forEach((el,i) => el.innerText = defaults[i]);
+        refreshAll();
+    });
+    document.getElementById('resetUaeBtn').addEventListener('click', () => {
+        let uaeDefaults = [41100,46300,51500,8300,2500,4000,3500,2000];
+        let mktDefaults = [1000,3000,2000,3000,25000,500];
+        document.querySelectorAll('[data-uae-monthly]').forEach((el,i) => el.innerText = uaeDefaults[i]);
+        document.querySelectorAll('[data-mkt-monthly]').forEach((el,i) => el.innerText = mktDefaults[i]);
+        refreshAll();
+    });
+    bindEvents();
+    refreshAll();
+</script>
+</body>
+</html>
